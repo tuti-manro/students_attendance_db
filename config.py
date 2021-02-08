@@ -1,4 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""config.py: Funcion para obtener los parametros de conexion del archivo "database.ini" """
+__author__ = "Ana María Manso Rodríguez"
+__credits__ = ["Ana María Manso Rodríguez"]
+__version__ = "1.0"
+__status__ = "Development"
+
 from configparser import ConfigParser
 from resources_aux import resource_path
 

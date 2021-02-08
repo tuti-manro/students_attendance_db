@@ -1,3 +1,9 @@
+"""resources_aux.py: Funcion para obtener ruta absoluta de recursos"""
+__author__ = "Ana María Manso Rodríguez"
+__credits__ = ["Ana María Manso Rodríguez"]
+__version__ = "1.0"
+__status__ = "Development"
+
 import os
 import sys
 

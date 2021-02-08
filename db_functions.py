@@ -1,7 +1,15 @@
-import mariadb
-import sys
-import pandas as pd
+#!/usr/bin/env python
+"""db_functions.py: Funciones para la interacción con la base de datos"""
+__author__ = "Ana María Manso Rodríguez"
+__credits__ = ["Ana María Manso Rodríguez"]
+__version__ = "1.0"
+__status__ = "Development"
+
 import os
+import sys
+
+import mariadb
+import pandas as pd
 
 from config import config
 
@@ -42,14 +50,19 @@ def load_data_to_DB(lista):
 def load_students_to_db(students_list):
     myConnection = connect_ddbb()
     myCursor = myConnection.cursor()
+    inserted = True
     for student in students_list:
         try:
             myCursor.execute("INSERT INTO students (student_id, student_name, student_last_name) VALUES (%s,%s,%s)",
                              student)
         except mariadb.IntegrityError:
             print("Student duplicated, skipped")
+        except Exception as e:
+            print("Error ocurred " + str(e))
+            inserted = False
     myConnection.commit()
     myConnection.close()
+    return inserted
 
 
 # Query groups in DB
@@ -92,10 +105,19 @@ def get_record_dates():
 # Convert to excel a list of students
 def get_students_records(id_e, name):
     conexion = connect_ddbb()
-    sql = "SELECT * FROM students_attendance WHERE id_event = " + id_e
-    df = pd.read_sql_query(sql, con=conexion)
-    excel_name = name + ' registros.xlsx'
-    df.to_excel(excel_name)
+    # Query, students to record attendance
+    sql1 = '''SELECT a.student_id, b.student_name, b.student_last_name
+    FROM registration a, students b
+    WHERE (a.id_group,a.subject) in (select id_group,subject from examn_groups where id_event = (%s))
+    and a.student_id = b.student_id'''
+    df1 = pd.read_sql_query(sql1, con=conexion, params=(id_e, id_e))
+    # Query, students attendance recorded
+    sql2 = '''SELECT * FROM students_attendance WHERE id_event = (%s)'''
+    df2 = pd.read_sql_query(sql2, con=conexion, params=(id_e,))
+    # Merge dataframes
+    df3 = pd.merge(df1, df2, on=['student_id', 'student_name', 'student_last_name'], how='left')
+    excel_name = name + 'registros.xlsx'
+    df3.to_excel(excel_name)
 
 
 # Insert new event date to DB
@@ -149,7 +171,7 @@ def new_students_to_db(file):
     df_list = []
     for row in df.to_numpy():
         df_list.append(tuple(row))
-    load_students_to_db(df_list)
+    return load_students_to_db(df_list)
 
 
 # Upload students data from CSV or EXCEL to DB

@@ -1,3 +1,9 @@
+"""widget_aux.py: Clases de widget auxiliares para la interfaz gráfica"""
+__author__ = "Ana María Manso Rodríguez"
+__credits__ = ["Ana María Manso Rodríguez"]
+__version__ = "1.0"
+__status__ = "Development"
+
 from tkinter import ttk
 import tkinter as tk
 
